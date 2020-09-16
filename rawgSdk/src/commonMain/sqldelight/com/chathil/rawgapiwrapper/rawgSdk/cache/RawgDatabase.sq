@@ -1,0 +1,484 @@
+import java.lang.Boolean;
+import java.util.Date;
+import kotlinx.serialization.descriptors.PrimitiveKind.INT;
+
+-- Creator Position
+CREATE TABLE Job (
+    id INTEGER AS Int PRIMARY KEY,
+    name TEXT NOT NULL,
+    slug TEXT
+);
+
+insertJob:
+INSERT OR REPLACE INTO Job
+VALUES(?, ?, ?);
+
+clearAllJobs:
+DELETE FROM Job;
+
+loadJobs:
+SELECT * FROM Job;
+
+loadJobById:
+SELECT * FROM Job
+WHERE id = ?;
+
+-- Creator
+CREATE TABLE Creator (
+    id INTEGER AS Int PRIMARY KEY,
+    nextPage TEXT,
+    prevPage TEXT,
+    name TEXT NOT NULL,
+    slug TEXT,
+    image TEXT,
+    imageBackground TEXT,
+    gamesCount INTEGER NOT NULL DEFAULT 0
+);
+
+loadCreators:
+SELECT * FROM Creator;
+
+insertCreator:
+INSERT OR REPLACE INTO Creator
+VALUES(?, ?, ?, ?, ?, ?, ?, ?);
+
+clearCreator:
+DELETE FROM Creator
+WHERE id = ?;
+
+clearAllCreators:
+DELETE FROM Creator;
+
+CREATE TABLE Creator_Job (
+    creatorId INTEGER AS Int NOT NULL,
+    jobId INTEGER AS Int NOT NULL,
+    PRIMARY KEY (creatorId, jobId),
+    FOREIGN KEY (creatorId) REFERENCES Creator(id),
+    FOREIGN KEY (jobId) REFERENCES Job(id)
+);
+
+insertCreator_CreatorPosition:
+INSERT OR REPLACE INTO Creator_Job
+VALUES(?, ?);
+
+clearCreator_CreatorPosition:
+DELETE FROM Creator_Job
+WHERE jobId = ?;
+
+clearCreator_CreatorPositions:
+DELETE FROM Creator_Job;
+
+CREATE TABLE Rating (
+    id INTEGER AS Int NOT NULL PRIMARY KEY AUTOINCREMENT,
+    gameId INTEGER AS Int NOT NULL,
+    title TEXT NOT NULL,
+    count INTEGER AS Int NOT NULL DEFAULT 0,
+    percent REAL AS Float NOT NULL DEFAULT 0.0,
+    FOREIGN KEY (gameId) REFERENCES Rating(id)
+);
+
+insertRating:
+INSERT OR REPLACE INTO Rating(gameId, title, count, percent)
+VALUES (?, ?, ?, ?);
+
+clearRating:
+DELETE FROM Rating
+WHERE id = ?;
+
+clearRatings:
+DELETE FROM Rating;
+
+loadRatings:
+SELECT * FROM Rating
+WHERE gameId IN ?;
+
+CREATE TABLE Platform (
+    id INTEGER AS Int PRIMARY KEY,
+    nextPage TEXT,
+    prevPage TEXT,
+    name TEXT NOT NULL,
+    slug TEXT,
+    gamesCount INTEGER AS Int NOT NULL DEFAULT 0,
+    imageBackground TEXT,
+    image TEXT,
+    yearStart INTEGER AS Int,
+    yearEnd INTEGER AS Int,
+    following INTEGER AS Boolean NOT NULL DEFAULT 0
+);
+
+insertPlatform:
+INSERT OR REPLACE INTO Platform
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+clearPlatform:
+DELETE FROM Platform
+WHERE id = ?;
+
+clearPlatforms:
+DELETE FROM Platform;
+
+loadPlatforms:
+SELECT * FROM Platform;
+
+
+CREATE TABLE Game_Platform (
+    gameId INTEGER AS Int NOT NULL,
+    platformId INTEGER AS Int NOT NULL,
+    releasedAt TEXT,
+    minimumRequirement TEXT,
+    recommendedRequirement TEXT,
+    PRIMARY KEY (gameId, platformId),
+    FOREIGN KEY (gameId) REFERENCES Game(id),
+    FOREIGN KEY (platformId) REFERENCES Platform(id)
+);
+
+insertGamePlatform:
+INSERT OR REPLACE INTO Game_Platform
+VALUES(?, ?, ?, ?, ?);
+
+clearGamePlatforms:
+DELETE FROM Game_Platform;
+
+loadGamePlatforms:
+SELECT * FROM Game_Platform
+JOIN Platform
+ON Game_Platform.platformId = Platform.id
+WHERE Game_Platform.gameId IN ?;
+
+CREATE TABLE Game_ParentPlatform (
+    gameId INTEGER AS Int NOT NULL,
+    platformId INTEGER AS Int NOT NULL,
+    PRIMARY KEY (gameId, platformId),
+    FOREIGN KEY (gameId) REFERENCES Game(id),
+    FOREIGN KEY (platformId) REFERENCES Platform(id)
+);
+
+insertGameParentPlatform:
+INSERT OR REPLACE INTO Game_ParentPlatform
+VALUES(?, ?);
+
+clearGameParentPlatforms:
+DELETE FROM Game_ParentPlatform;
+
+loadGameParentPlatforms:
+SELECT * FROM Game_ParentPlatform
+JOIN Platform
+ON Game_ParentPlatform.platformId = Platform.id
+WHERE Game_ParentPlatform.gameId IN ?;
+
+-- Store
+CREATE TABLE Store (
+    id INTEGER AS Int PRIMARY KEY,
+    name TEXT NOT NULL,
+    slug TEXT,
+    domain TEXT,
+    gamesCount INTEGER AS Int NOT NULL DEFAULT 0,
+    imageBackground TEXT,
+    following INTEGER AS Boolean NOT NULL DEFAULT 0
+);
+
+loadStores:
+SELECT * FROM Store;
+
+insertStore:
+INSERT OR REPLACE INTO Store
+VALUES(?, ?, ?, ?, ?, ?, ?);
+
+clearStore:
+DELETE FROM Store
+WHERE id = ?;
+
+clearStores:
+DELETE FROM Store;
+
+CREATE TABLE Game_Store (
+    gameId INTEGER AS Int NOT NULL,
+    storeId INTEGER AS Int NOT NULL,
+    url TEXT,
+    PRIMARY KEY (gameId, storeId),
+    FOREIGN KEY (gameId) REFERENCES Game(id),
+    FOREIGN KEY (storeId) REFERENCES Store(id)
+);
+
+insertGameStore:
+INSERT OR REPLACE INTO Game_Store
+VALUES (?, ?, ?);
+
+clearGameStores:
+DELETE FROM Game_Store;
+
+loadGameStores:
+SELECT * FROM Game_Store
+JOIN Store
+ON Game_Store.storeId = Store.id
+WHERE Game_Store.gameId IN ?;
+
+CREATE TABLE Genre (
+    id INTEGER AS Int PRIMARY KEY,
+    name TEXT NOT NULL,
+    slug TEXT,
+    gamesCount INTEGER AS Int NOT NULL DEFAULT 0,
+    imageBackground TEXT
+);
+
+loadGenres:
+SELECT * FROM Genre;
+
+insertGenre:
+INSERT OR REPLACE INTO Genre
+VALUES (?, ?, ?, ?, ?);
+
+clearGenre:
+DELETE FROM Genre
+WHERE id = ?;
+
+clearAllGenres:
+DELETE FROM Genre;
+
+CREATE TABLE Game_Genre (
+    gameId INTEGER AS Int NOT NULL,
+    genreId INTEGER AS Int NOT NULL,
+    PRIMARY KEY (gameId, genreId),
+    FOREIGN KEY (gameId) REFERENCES Game(id),
+    FOREIGN KEY (genreId) REFERENCES Genre(id)
+);
+
+insertGameGenre:
+INSERT OR REPLACE INTO Game_Genre
+VALUES (?, ?);
+
+clearAllGameGenres:
+DELETE FROM Game_Genre;
+
+loadGameGenres:
+SELECT * FROM Game_Genre
+JOIN Genre
+ON Game_Genre.genreId = Genre.id
+WHERE Game_Genre.gameId IN ?;
+
+-- Developer
+CREATE TABLE Developer (
+    id INTEGER AS Int PRIMARY KEY,
+    name TEXT NOT NULL,
+    slug TEXT,
+    gameCount INTEGER AS Int NOT NULL DEFAULT 0,
+    imageBackground TEXT,
+    description TEXT
+);
+
+insertDeveloper:
+INSERT OR REPLACE INTO Developer(id, name, slug, gameCount, imageBackground, description)
+VALUES(?, ?, ?, ?, ?, ?);
+
+clearAllDevelopers:
+DELETE FROM Developer;
+
+clearDeveloper:
+DELETE FROM Developer
+WHERE id = ?;
+
+loadDevelopers:
+SELECT * FROM Developer;
+
+loadDevelopersByIds:
+SELECT * FROM Developer
+WHERE id IN (?);
+
+CREATE TABLE Game_Developer (
+    gameId INTEGER AS Int NOT NULL,
+    developerId INTEGER AS Int NOT NULL,
+    PRIMARY KEY (gameId, developerId),
+    FOREIGN KEY (gameId) REFERENCES Game(id),
+    FOREIGN KEY (developerId) REFERENCES Developer(id)
+);
+
+insertGameDeveloper:
+INSERT OR REPLACE INTO Game_Developer
+VALUES (?, ?);
+
+clearGameDevelopers:
+DELETE FROM Game_Developer;
+
+CREATE TABLE Tag (
+    id INTEGER AS Int PRIMARY KEY,
+    nextPage TEXT,
+    prevPage TEXT,
+    name TEXT NOT NULL,
+    slug TEXT,
+    gamesCount INTEGER AS Int NOT NULL DEFAULT 0,
+    language TEXT,
+    imageBackground TEXT
+);
+
+loadTags:
+SELECT * FROM Tag;
+
+insertTag:
+INSERT OR REPLACE INTO Tag
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+clearTag:
+DELETE FROM Tag
+WHERE id = ?;
+
+clearTags:
+DELETE FROM Tag;
+
+CREATE TABLE Game_Tag (
+    gameId INTEGER AS Int NOT NULL,
+    tagId INTEGER AS Int NOT NULL,
+    PRIMARY KEY (gameId, tagId),
+    FOREIGN KEY (gameId) REFERENCES Game(id),
+    FOREIGN KEY (tagId) REFERENCES Tag(id)
+);
+
+insertGameTag:
+INSERT OR REPLACE INTO Game_Tag
+VALUES(?, ?);
+
+clearAllGameTags:
+DELETE FROM Tag;
+
+loadGameTags:
+SELECT * FROM Game_Tag
+JOIN Tag
+ON Game_Tag.tagId = Tag.id
+WHERE Game_Tag.gameId IN ?;
+
+CREATE TABLE Publisher (
+    id INTEGER AS Int PRIMARY KEY,
+    nextPage TEXT,
+    prevPage TEXT,
+    name TEXT NOT NULL,
+    slug TEXT,
+    gamesCount INTEGER AS Int NOT NULL DEFAULT 0,
+    imageBackground TEXT
+);
+
+loadPublishers:
+SELECT * FROM Publisher;
+
+insertPublisher:
+INSERT OR REPLACE INTO Publisher
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+clearPublisher:
+DELETE FROM Publisher
+WHERE id = ?;
+
+clearAllPublishers:
+DELETE FROM Publisher;
+
+CREATE TABLE Game_Publisher (
+    gameId INTEGER AS Int NOT NULL,
+    publisherId INTEGER AS Int NOT NULL,
+    PRIMARY KEY (gameId, publisherId),
+    FOREIGN KEY (gameId) REFERENCES Game(id),
+    FOREIGN KEY (publisherId) REFERENCES Publisher(id)
+);
+
+insertGamePublisher:
+INSERT OR REPLACE INTO Game_Publisher
+VALUES(?, ?);
+
+clearAllGamePublishers:
+DELETE FROM Game_Publisher;
+
+CREATE TABLE Game_Screenshot (
+    id INTEGER AS Int PRIMARY KEY AUTOINCREMENT,
+    gameId INTEGER AS Int NOT NULL,
+    url TEXT,
+    FOREIGN KEY (gameId) REFERENCES Game(id)
+);
+
+insertGameScreenshots:
+INSERT OR REPLACE INTO Game_Screenshot
+VALUES (?, ?, ?);
+
+clearGameScreenshotsByGameId:
+DELETE FROM Game_Screenshot
+WHERE gameId = ?;
+
+loadGameScreenshots:
+SELECT * FROM Game_Screenshot
+WHERE Game_Screenshot.gameId IN ?;
+
+CREATE TABLE GameDetail(
+    id INTEGER AS Int PRIMARY KEY,
+    backgroundImageAddtional TEXT,
+    description TEXT,
+    rawDescription TEXT,
+    screenshotsCount INTEGER AS Int NOT NULL DEFAULT 0,
+    moviesCount INTEGER AS Int NOT NULL DEFAULT 0,
+    creatorsCount INTEGER AS Int NOT NULL DEFAULT 0,
+    achievementsCount INTEGER AS Int NOT NULL DEFAULT 0,
+    parentAchievementsCount INTEGER AS Int NOT NULL DEFAULT 0,
+    redditUrl TEXT,
+    redditName TEXT,
+    redditDescription TEXT,
+    redditLogo TEXT,
+    redditCount INTEGER AS Int NOT NULL DEFAULT 0,
+    twitchCount INTEGER AS Int NOT NULL DEFAULT 0,
+    youtubeCount INTEGER AS Int NOT NULL DEFAULT 0,
+    additionsCount INTEGER AS Int NOT NULL DEFAULT 0,
+    seriesCount INTEGER As Int NOT NULL DEFAULT 0,
+    FOREIGN KEY (id) REFERENCES Game(id)
+);
+
+insertGameDetail:
+INSERT OR REPLACE INTO GameDetail
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+loadGameDetail:
+SELECT * FROM GameDetail
+WHERE id = ?;
+
+clearGameDetail:
+DELETE FROM GameDetail
+WHERE id = ?;
+
+clearGameDetails:
+DELETE FROM GameDetail;
+
+CREATE TABLE Game (
+    id INTEGER AS Int PRIMARY KEY,
+    nextPage TEXT,
+    prevPage TEXT,
+    name TEXT NOT NULL,
+    slug TEXT,
+    released TEXT,
+    tba INTEGER AS Boolean NOT NULL DEFAULT 0,
+    backgroundImage TEXT,
+    rating REAL AS Float NOT NULL DEFAULT 0.0,
+    ratingTop REAL AS Float NOT NULL DEFAULT 5.0,
+    ratingsCount INTEGER AS Int NOT NULL DEFAULT 0,
+    reviewTextCount INTEGER AS Int NOT NULL DEFAULT 0,
+    added INTEGER AS Int NOT NULL DEFAULT 0,
+    metacritic INTEGER AS Int NOT NULL DEFAULT 0,
+    playtime INTEGER AS Int NOT NULL DEFAULT 0,
+    suggestionCount INTEGER AS Int NOT NULL DEFAULT 0,
+    reviewsCount INTEGER AS Int NOT NULL DEFAULT 0,
+    saturatedColor TEXT,
+    dominantColor TEXT,
+    clip TEXT
+);
+
+loadGames:
+SELECT *
+FROM Game;
+
+loadGame:
+SELECT * FROM Game
+WHERE id = ?;
+
+insertGame:
+INSERT OR REPLACE INTO Game
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+clearGame:
+DELETE FROM Game
+WHERE id = ?;
+
+clearAllGames:
+DELETE FROM Game;
+
