@@ -92,6 +92,10 @@ loadRatings:
 SELECT * FROM Rating
 WHERE gameId IN ?;
 
+loadRatingsForGame:
+SELECT * FROM Rating
+WHERE gameId = ?;
+
 CREATE TABLE Platform (
     id INTEGER AS Int PRIMARY KEY,
     nextPage TEXT,
@@ -120,7 +124,6 @@ DELETE FROM Platform;
 loadPlatforms:
 SELECT * FROM Platform;
 
-
 CREATE TABLE Game_Platform (
     gameId INTEGER AS Int NOT NULL,
     platformId INTEGER AS Int NOT NULL,
@@ -139,11 +142,11 @@ VALUES(?, ?, ?, ?, ?);
 clearGamePlatforms:
 DELETE FROM Game_Platform;
 
-loadGamePlatforms:
+loadPlatformsForGame:
 SELECT * FROM Game_Platform
 JOIN Platform
 ON Game_Platform.platformId = Platform.id
-WHERE Game_Platform.gameId IN ?;
+WHERE gameId = ?;
 
 CREATE TABLE Game_ParentPlatform (
     gameId INTEGER AS Int NOT NULL,
@@ -160,11 +163,11 @@ VALUES(?, ?);
 clearGameParentPlatforms:
 DELETE FROM Game_ParentPlatform;
 
-loadGameParentPlatforms:
+loadParentPlatformsForGames:
 SELECT * FROM Game_ParentPlatform
 JOIN Platform
 ON Game_ParentPlatform.platformId = Platform.id
-WHERE Game_ParentPlatform.gameId IN ?;
+WHERE Game_ParentPlatform.gameId = ?;
 
 -- Store
 CREATE TABLE Store (
@@ -207,11 +210,11 @@ VALUES (?, ?, ?);
 clearGameStores:
 DELETE FROM Game_Store;
 
-loadGameStores:
+loadStoresForGame:
 SELECT * FROM Game_Store
 JOIN Store
 ON Game_Store.storeId = Store.id
-WHERE Game_Store.gameId IN ?;
+WHERE Game_Store.gameId = ?;
 
 CREATE TABLE Genre (
     id INTEGER AS Int PRIMARY KEY,
@@ -250,11 +253,11 @@ VALUES (?, ?);
 clearAllGameGenres:
 DELETE FROM Game_Genre;
 
-loadGameGenres:
+loadGenreForGames:
 SELECT * FROM Game_Genre
 JOIN Genre
 ON Game_Genre.genreId = Genre.id
-WHERE Game_Genre.gameId IN ?;
+WHERE Game_Genre.gameId = ?;
 
 -- Developer
 CREATE TABLE Developer (
@@ -339,11 +342,11 @@ VALUES(?, ?);
 clearAllGameTags:
 DELETE FROM Tag;
 
-loadGameTags:
+loadTagsForGame:
 SELECT * FROM Game_Tag
 JOIN Tag
 ON Game_Tag.tagId = Tag.id
-WHERE Game_Tag.gameId IN ?;
+WHERE Game_Tag.gameId = ?;
 
 CREATE TABLE Publisher (
     id INTEGER AS Int PRIMARY KEY,
@@ -399,9 +402,9 @@ clearGameScreenshotsByGameId:
 DELETE FROM Game_Screenshot
 WHERE gameId = ?;
 
-loadGameScreenshots:
+loadScreenshotsForGame:
 SELECT * FROM Game_Screenshot
-WHERE Game_Screenshot.gameId IN ?;
+WHERE Game_Screenshot.gameId = ?;
 
 CREATE TABLE GameDetail(
     id INTEGER AS Int PRIMARY KEY,

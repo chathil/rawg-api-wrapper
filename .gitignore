@@ -13,3 +13,4 @@
 .externalNativeBuild
 .cxx
 local.properties
+/rawgSdk/build/generated/sqldelight/
