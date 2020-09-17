@@ -6,19 +6,22 @@ import android.util.Log
 import android.widget.TextView
 import com.chathil.rawgapiwrapper.rawgSdk.RawgSDK
 import com.chathil.rawgapiwrapper.rawgSdk.cache.DatabaseDriverFactory
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import com.chathil.rawgapiwrapper.rawgSdk.utils.flattenToList
+import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
     private val mainScope = MainScope()
 
     private val sdk = RawgSDK(DatabaseDriverFactory(this))
+    @FlowPreview
+    @ExperimentalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         mainScope.launch {
-            Log.d(TAG, "onCreate: ${sdk.getLaunches(false)}")
+            val res = sdk.getLaunches(false)
+            Log.d(TAG, "onCreate: $res")
+            Log.d(TAG, "onCreate: Ratings :${res[0].ratings()} ")
         }
     }
 

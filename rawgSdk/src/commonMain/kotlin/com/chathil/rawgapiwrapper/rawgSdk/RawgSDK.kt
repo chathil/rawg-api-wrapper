@@ -8,6 +8,5 @@ import com.chathil.rawgapiwrapper.rawgSdk.network.RawgApi
 expect class RawgSDK (databaseDriverFactory: DatabaseDriverFactory) {
     internal val database: Database
     internal val api: RawgApi
-
     @Throws(Exception::class) suspend fun getLaunches(forceReload: Boolean): List<Game>
 }

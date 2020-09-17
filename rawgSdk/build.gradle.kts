@@ -11,6 +11,34 @@ plugins {
 group = "com.chathil.rawgapiwrapper"
 version = "1.0-SNAPSHOT"
 
+android {
+    compileSdkVersion(30)
+    defaultConfig {
+        minSdkVersion(24)
+        targetSdkVersion(30)
+        versionCode = 1
+        versionName = "1.0"
+    }
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+        }
+    }
+    // By default the android gradle plugin expects to find the kotlin source files in
+    // the folder `main` and the test in the folder `test`. This is to be able place
+    // the source code files inside androidMain and androidTest folders
+
+    sourceSets.getByName("main") {
+        manifest.srcFile("src/androidMain/AndroidManifest.xml")
+        java.srcDirs("src/androidMain/kotlin")
+        res.srcDirs("src/androidMain/res")
+    }
+    sourceSets.getByName("test") {
+        java.srcDirs("src/androidTest/kotlin")
+        res.srcDirs("src/androidTest/res")
+    }
+}
+
 repositories {
     gradlePluginPortal()
     google()

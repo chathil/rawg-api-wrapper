@@ -8,51 +8,43 @@ import com.chathil.rawgapiwrapper.rawgSdk.models.Rating
 import com.chathil.rawgapiwrapper.rawgSdk.models.Store
 import com.chathil.rawgapiwrapper.rawgSdk.models.Tag
 import com.chathil.rawgapiwrapper.rawgSdk.network.GameListResponse
+import com.squareup.sqldelight.Query
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
+import kotlinx.coroutines.flow.Flow
 
 internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
     private val database = RawgDatabase(databaseDriverFactory.createDriver())
     private val dbQuery = database.rawgDatabaseQueries
 
-    internal fun getAllGames(): List<Game> {
+    internal fun getAllGames(): Flow<List<Game>> {
         val games =
-            dbQuery.loadGames(::mapAsDomainModel).executeAsList().map { it.id to it }.toMap() // .asFlow
-
-        val gameFlows =
-            dbQuery.loadGames(::mapAsDomainModel).executeAsList().map { it.id to it }.toMap() // .asFlow
-
-        dbQuery.loadRatings(games.keys, ::mapAsDomainModel).executeAsList().forEach {
-            (games[it.gameId]
-                ?: error("No rating found for game with id ${it.gameId}")).ratings += listOf(it)
-        }
-        dbQuery.loadGamePlatforms(games.keys, ::mapAsDomainModel).executeAsList().forEach {
-            (games[it.gameId]
-                ?: error("No platform found for game with id ${it.gameId}")).platforms += listOf(it)
-        }
-        dbQuery.loadGameParentPlatforms(games.keys, ::mapAsDomainModel).executeAsList().forEach {
-            (games[it.gameId]
-                ?: error("No platform found for game with id ${it.gameId}")).parentPlatforms += listOf(
-                it
-            )
-        }
-        dbQuery.loadGameGenres(games.keys, ::mapAsDomainModel).executeAsList().forEach {
-            (games[it.gameId]
-                ?: error("No genre found for game with id ${it.gameId}")).genres += listOf(it)
-        }
-        dbQuery.loadGameStores(games.keys, ::mapAsDomainModel).executeAsList().forEach {
-            (games[it.gameId]
-                ?: error("No store found for game with id ${it.gameId}")).stores
-        }
-        dbQuery.loadGameTags(games.keys, ::mapAsDomainModel).executeAsList().forEach {
-            (games[it.gameId]
-                ?: error("No tag found for game with id ${it.gameId}")).tags += listOf(it)
-        }
-        dbQuery.loadGameScreenshots(games.keys, ::mapAsDomainModel).executeAsList().forEach {
-            (games[it.gameId]
-                ?: error("No screenshot found for game with id ${it.gameId}")).shortScreenshots += listOf(
-                it
-            )
-        }
-        return games.values.toList()
+            dbQuery.loadGames { id, nextPage, prevPage, name, slug, released, tba, backgroundImage, rating, ratingTop, ratingsCount, reviewTextCount, added, metacritic, playtime, suggestionCount, reviewsCount, saturatedColor, dominantColor, clip ->
+                Game(
+                    id = id,
+                    next = nextPage,
+                    prev = prevPage,
+                    slug = slug,
+                    name = name,
+                    released = released,
+                    tba = tba,
+                    backgroundImage = backgroundImage,
+                    rating = rating,
+                    ratingTop = ratingTop,
+                    ratingsCount = ratingsCount,
+                    reviewsTextCount = reviewTextCount,
+                    added = added,
+                    metacritic = metacritic,
+                    playtime = playtime,
+                    suggestionsCount = suggestionCount,
+                    reviewsCount = reviewsCount,
+                    saturatedColor = saturatedColor,
+                    dominantColor = dominantColor,
+                    clip = clip,
+                    dbQuery = dbQuery
+                )
+            }.asFlow().mapToList()
+        return games
     }
 
     internal fun cacheGames(gameListResponse: GameListResponse) {
@@ -165,153 +157,4 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
     internal fun clearGame(id: Int) {
         dbQuery.clearGame(id)
     }
-
-    private fun mapAsDomainModel(
-        id: Int,
-        gameId: Int,
-        title: String,
-        count: Int,
-        percent: Float
-    ) = Rating(id, gameId, title, count, percent)
-
-    private fun mapAsDomainModel(
-        id: Int,
-        nextPage: String?,
-        prevPage: String?,
-        name: String,
-        slug: String?,
-        released: String?,
-        tba: Boolean,
-        backgroundImage: String?,
-        rating: Float,
-        ratingTop: Float,
-        ratingsCount: Int,
-        reviewTextCount: Int,
-        added: Int,
-        metacritic: Int,
-        playtime: Int,
-        suggestionCount: Int,
-        reviewsCount: Int,
-        saturatedColor: String?,
-        dominantColor: String?,
-        clip: String?
-    ) = Game(
-        id = id,
-        next = nextPage,
-        prev = prevPage,
-        slug = slug,
-        name = name,
-        released = released,
-        tba = tba,
-        backgroundImage = backgroundImage,
-        rating = rating,
-        ratingTop = ratingTop,
-        ratings = emptyList(),
-        ratingsCount = ratingsCount,
-        reviewsTextCount = reviewTextCount,
-        added = added,
-        metacritic = metacritic,
-        playtime = playtime,
-        suggestionsCount = suggestionCount,
-        reviewsCount = reviewsCount,
-        saturatedColor = saturatedColor,
-        dominantColor = dominantColor,
-        platforms = emptyList(),
-        parentPlatforms = emptyList(),
-        genres = emptyList(),
-        stores = emptyList(),
-        clip = clip,
-        tags = emptyList(),
-        shortScreenshots = emptyList()
-    )
-
-    private fun mapAsDomainModel(
-        gameId: Int,
-        platformId: Int,
-        releasedAt: String?,
-        minimumRequirement: String?,
-        recommendedRequirement: String?,
-        id: Int,
-        nextPage: String?,
-        prevPage: String?,
-        name: String,
-        slug: String?,
-        gamesCount: Int,
-        imageBackground: String?,
-        image: String?,
-        yearStart: Int?,
-        yearEnd: Int?,
-        following: Boolean
-    ) = GamePlatform(
-        gameId,
-        Platform(
-            platformId,
-            name,
-            slug,
-            image,
-            yearEnd,
-            yearStart,
-            gamesCount,
-            imageBackground
-        ), releasedAt, Requirement(minimumRequirement, recommendedRequirement)
-    )
-
-    private fun mapAsDomainModel(
-        gameId: Int,
-        platformId: Int,
-        id: Int,
-        nextPage: String?,
-        prevPage: String?,
-        name: String,
-        slug: String?,
-        gamesCount: Int,
-        imageBackground: String?,
-        image: String?,
-        yearStart: Int?,
-        yearEnd: Int?,
-        following: Boolean
-    ) = ParentPlatform(gameId, platformId, name, slug)
-
-    private fun mapAsDomainModel(
-        gameId: Int,
-        genreId: Int,
-        id: Int,
-        name: String,
-        slug: String?,
-        gamesCount: Int,
-        imageBackground: String?
-    ) = Genre(gameId, genreId, name, slug, gamesCount, imageBackground)
-
-    private fun mapAsDomainModel(
-        gameId: Int,
-        storeId: Int,
-        url: String?,
-        id: Int,
-        name: String,
-        slug: String?,
-        domain: String?,
-        gamesCount: Int,
-        imageBackground: String?,
-        following: Boolean
-    ) = GameStore(gameId, id, Store(id, name, slug, domain, gamesCount, imageBackground), url)
-
-    private fun mapAsDomainModel(
-        gameId: Int,
-        tagId: Int,
-        id: Int,
-        nextPage: String?,
-        prevPage: String?,
-        name: String,
-        slug: String?,
-        gamesCount: Int,
-        language: String?,
-        imageBackground: String?
-    ) = Tag(gameId, id, name, slug, language, gamesCount, imageBackground)
-
-    private fun mapAsDomainModel(
-        id: Int,
-        gameId: Int,
-        url: String?
-    ) = ShortScreenshot(gameId, id, url)
-
 }

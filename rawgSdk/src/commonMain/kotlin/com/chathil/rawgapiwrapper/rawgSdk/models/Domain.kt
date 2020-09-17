@@ -1,5 +1,10 @@
 package com.chathil.rawgapiwrapper.rawgSdk.models
 
+import com.chathil.rawgapiwrapper.rawgSdk.cache.RawgDatabaseQueries
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
+import kotlinx.coroutines.flow.Flow
+
 data class Game(
     val id: Int,
     val next: String?,
@@ -11,7 +16,6 @@ data class Game(
     val backgroundImage: String?,
     val rating: Float,
     val ratingTop: Float,
-    var ratings: List<Rating>,
     val ratingsCount: Int,
     val reviewsTextCount: Int,
     val added: Int,
@@ -21,14 +25,122 @@ data class Game(
     val reviewsCount: Int,
     val saturatedColor: String?,
     val dominantColor: String?,
-    var platforms: List<GamePlatform>,
-    var parentPlatforms: List<ParentPlatform>,
-    var genres: List<Genre>,
-    var stores: List<GameStore>,
     val clip: String?,
-    var tags: List<Tag>,
-    var shortScreenshots: List<ShortScreenshot>
-)
+    val dbQuery: RawgDatabaseQueries
+) {
+    fun ratings() =
+        dbQuery.loadRatingsForGame(id) { id: Int,
+                                         gameId: Int,
+                                         title: String,
+                                         count: Int,
+                                         percent: Float ->
+            Rating(id, gameId, title, count, percent)
+        }.executeAsList()
+
+
+    fun platforms() =
+        dbQuery.loadPlatformsForGame(id) { gameId: Int,
+                                           platformId: Int,
+                                           releasedAt: String?,
+                                           minimumRequirement: String?,
+                                           recommendedRequirement: String?,
+                                           id: Int,
+                                           nextPage: String?,
+                                           prevPage: String?,
+                                           name: String,
+                                           slug: String?,
+                                           gamesCount: Int,
+                                           imageBackground: String?,
+                                           image: String?,
+                                           yearStart: Int?,
+                                           yearEnd: Int?,
+                                           following: Boolean ->
+            GamePlatform(
+                gameId,
+                Platform(
+                    platformId,
+                    name,
+                    slug,
+                    image,
+                    yearEnd,
+                    yearStart,
+                    gamesCount,
+                    imageBackground
+                ), releasedAt, Requirement(minimumRequirement, recommendedRequirement)
+            )
+        }.executeAsList()
+
+
+    fun parentPlatforms() =
+        dbQuery.loadParentPlatformsForGames(id) { gameId: Int,
+                                                  platformId: Int,
+                                                  id: Int,
+                                                  nextPage: String?,
+                                                  prevPage: String?,
+                                                  name: String,
+                                                  slug: String?,
+                                                  gamesCount: Int,
+                                                  imageBackground: String?,
+                                                  image: String?,
+                                                  yearStart: Int?,
+                                                  yearEnd: Int?,
+                                                  following: Boolean ->
+            ParentPlatform(gameId, platformId, name, slug)
+        }.executeAsList()
+
+
+    fun genres() =
+        dbQuery.loadGenreForGames(id) { gameId: Int,
+                                        genreId: Int,
+                                        id: Int,
+                                        name: String,
+                                        slug: String?,
+                                        gamesCount: Int,
+                                        imageBackground: String? ->
+            Genre(gameId, genreId, name, slug, gamesCount, imageBackground)
+        }.executeAsList()
+
+
+    fun stores() =
+        dbQuery.loadStoresForGame(id) { gameId: Int,
+                                        storeId: Int,
+                                        url: String?,
+                                        id: Int,
+                                        name: String,
+                                        slug: String?,
+                                        domain: String?,
+                                        gamesCount: Int,
+                                        imageBackground: String?,
+                                        following: Boolean ->
+            GameStore(gameId, id, Store(id, name, slug, domain, gamesCount, imageBackground), url)
+
+        }.executeAsList()
+
+
+    fun tags() =
+        dbQuery.loadTagsForGame(id) { gameId: Int,
+                                      tagId: Int,
+                                      id: Int,
+                                      nextPage: String?,
+                                      prevPage: String?,
+                                      name: String,
+                                      slug: String?,
+                                      gamesCount: Int,
+                                      language: String?,
+                                      imageBackground: String? ->
+            Tag(gameId, id, name, slug, language, gamesCount, imageBackground)
+
+        }.executeAsList()
+
+
+    fun shortScreenshots() =
+        dbQuery.loadScreenshotsForGame(id) { id: Int,
+                                             gameId: Int,
+                                             url: String? ->
+            ShortScreenshot(gameId, id, url)
+        }.executeAsList()
+
+}
 
 data class Rating(
     val id: Int,
