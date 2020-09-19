@@ -4,6 +4,7 @@ import io.ktor.client.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
 import io.ktor.client.request.*
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class RawgApi {
@@ -14,8 +15,20 @@ class RawgApi {
         }
     }
 
-    internal suspend fun getGames(): GameListResponse {
+    internal suspend fun getGames(config: GameListRequestConfig): GameListResponse {
         return httpClient.get(GAME)
+//            config.apply {
+//                page?.let {
+//                    parameter("page", it)
+//                }
+//                pageSize?.let {
+//                    parameter("page_size", it)
+//                }
+//                search?.let {
+//                    parameter("search", it)
+//                }
+//            }
+//        }
     }
 
     companion object {

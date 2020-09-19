@@ -3,6 +3,7 @@ package com.chathil.rawgapiwrapper.rawgSdk
 import com.chathil.rawgapiwrapper.rawgSdk.cache.Database
 import com.chathil.rawgapiwrapper.rawgSdk.cache.DatabaseDriverFactory
 import com.chathil.rawgapiwrapper.rawgSdk.models.Game
+import com.chathil.rawgapiwrapper.rawgSdk.network.GameListRequestConfig
 import com.chathil.rawgapiwrapper.rawgSdk.network.RawgApi
 import com.chathil.rawgapiwrapper.rawgSdk.utils.flattenToList
 import kotlinx.coroutines.flow.Flow
@@ -14,16 +15,16 @@ actual class RawgSDK actual constructor(databaseDriverFactory: DatabaseDriverFac
     internal actual val database = Database(databaseDriverFactory)
     internal actual val api = RawgApi()
 
-    @Throws(Exception::class) actual suspend fun getLaunches(forceReload: Boolean): List<Game> {
-        val cachedLaunches = database.getAllGames().flattenToList()
+    @Throws(Exception::class) actual suspend fun getGames(forceReload: Boolean, config: GameListRequestConfig): List<Game> {
+        val cachedLaunches = database.getAllGames(config).flattenToList()
         return if (cachedLaunches.isNotEmpty() && !forceReload) {
             cachedLaunches
         } else {
-            api.getGames().also {
+            api.getGames(config).also {
                 database.clearAllGames()
                 database.cacheGames(it)
             }
-            val dbResponse = database.getAllGames()
+            val dbResponse = database.getAllGames(config)
             return dbResponse.flattenToList()
         }
     }

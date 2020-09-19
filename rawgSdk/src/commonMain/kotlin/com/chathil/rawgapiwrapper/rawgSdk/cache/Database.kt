@@ -1,14 +1,8 @@
 package com.chathil.rawgapiwrapper.rawgSdk.cache
 
-import com.chathil.rawgapiwrapper.rawgSdk.models.*
 import com.chathil.rawgapiwrapper.rawgSdk.models.Game
-import com.chathil.rawgapiwrapper.rawgSdk.models.Genre
-import com.chathil.rawgapiwrapper.rawgSdk.models.Platform
-import com.chathil.rawgapiwrapper.rawgSdk.models.Rating
-import com.chathil.rawgapiwrapper.rawgSdk.models.Store
-import com.chathil.rawgapiwrapper.rawgSdk.models.Tag
+import com.chathil.rawgapiwrapper.rawgSdk.network.GameListRequestConfig
 import com.chathil.rawgapiwrapper.rawgSdk.network.GameListResponse
-import com.squareup.sqldelight.Query
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import kotlinx.coroutines.flow.Flow
@@ -17,37 +11,36 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
     private val database = RawgDatabase(databaseDriverFactory.createDriver())
     private val dbQuery = database.rawgDatabaseQueries
 
-    internal fun getAllGames(): Flow<List<Game>> {
-        val games =
-            dbQuery.loadGames { id, nextPage, prevPage, name, slug, released, tba, backgroundImage, rating, ratingTop, ratingsCount, reviewTextCount, added, metacritic, playtime, suggestionCount, reviewsCount, saturatedColor, dominantColor, clip ->
-                Game(
-                    id = id,
-                    next = nextPage,
-                    prev = prevPage,
-                    slug = slug,
-                    name = name,
-                    released = released,
-                    tba = tba,
-                    backgroundImage = backgroundImage,
-                    rating = rating,
-                    ratingTop = ratingTop,
-                    ratingsCount = ratingsCount,
-                    reviewsTextCount = reviewTextCount,
-                    added = added,
-                    metacritic = metacritic,
-                    playtime = playtime,
-                    suggestionsCount = suggestionCount,
-                    reviewsCount = reviewsCount,
-                    saturatedColor = saturatedColor,
-                    dominantColor = dominantColor,
-                    clip = clip,
-                    dbQuery = dbQuery
-                )
-            }.asFlow().mapToList()
-        return games
+    internal fun getAllGames(config: GameListRequestConfig): Flow<List<Game>> {
+        return dbQuery.loadAllGames { id, nextPage, prevPage, name, slug, released, tba, backgroundImage, rating, ratingTop, ratingsCount, reviewTextCount, added, metacritic, playtime, suggestionCount, reviewsCount, saturatedColor, dominantColor, clip ->
+            Game(
+                id = id,
+                next = nextPage,
+                prev = prevPage,
+                slug = slug,
+                name = name,
+                released = released,
+                tba = tba,
+                backgroundImage = backgroundImage,
+                rating = rating,
+                ratingTop = ratingTop,
+                ratingsCount = ratingsCount,
+                reviewsTextCount = reviewTextCount,
+                added = added,
+                metacritic = metacritic,
+                playtime = playtime,
+                suggestionsCount = suggestionCount,
+                reviewsCount = reviewsCount,
+                saturatedColor = saturatedColor,
+                dominantColor = dominantColor,
+                clip = clip,
+                dbQuery = dbQuery
+            )
+        }.asFlow().mapToList()
     }
 
     internal fun cacheGames(gameListResponse: GameListResponse) {
+        println(gameListResponse.results)
         dbQuery.transaction {
             gameListResponse.results.forEach {
                 dbQuery.insertGame(

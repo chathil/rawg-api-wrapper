@@ -72,7 +72,7 @@ data class Game(
 
 
     fun parentPlatforms() =
-        dbQuery.loadParentPlatformsForGames(id) { gameId: Int,
+        dbQuery.loadParentPlatformsForGame(id) { gameId: Int,
                                                   platformId: Int,
                                                   id: Int,
                                                   nextPage: String?,
@@ -90,7 +90,7 @@ data class Game(
 
 
     fun genres() =
-        dbQuery.loadGenreForGames(id) { gameId: Int,
+        dbQuery.loadGenreForGame(id) { gameId: Int,
                                         genreId: Int,
                                         id: Int,
                                         name: String,
