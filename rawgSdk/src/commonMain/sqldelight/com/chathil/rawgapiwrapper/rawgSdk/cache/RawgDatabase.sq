@@ -466,26 +466,21 @@ CREATE TABLE Game (
     clip TEXT
 );
 
--- Missing game creator from game detail
 loadGames:
+SELECT Game.*
+FROM Game;
+
+-- Missing game creator from game detail
+searchGames:
 SELECT DISTINCT Game.*
 FROM Game
-JOIN Game_ParentPlatform ON Game.id = Game_ParentPlatform.gameId
-JOIN Game_Platform ON Game.id = Game_ParentPlatform.gameId
-JOIN Game_Store ON Game.id = Game_Store.gameId
-JOIN Game_Developer ON Game.id = Game_Developer.gameId
-JOIN Game_Publisher ON Game.id = Game_Publisher.gameId
-JOIN Game_Genre ON Game.id = Game_Genre.gameId
-JOIN Game_Tag ON Game.id = Game_Tag.gameId
-WHERE Game.name LIKE ?
-OR Game_ParentPlatform.platformId IN ?
-OR Game_Platform.platformId IN ?
-OR Game_Store.storeId IN ?
-OR Game_Developer.developerId IN ?
-OR Game_Publisher.publisherId IN ?;
+WHERE Game.name LIKE  ?;
 
-loadAllGames:
-SELECT * FROM Game;
+gamesFromPublishers:
+SELECT DISTINCT Game.*
+FROM Game
+JOIN Game_Platform ON Game.id = Game_Platform.gameId
+WHERE Game_Platform.platformId IN ?;
 
 loadGame:
 SELECT * FROM Game

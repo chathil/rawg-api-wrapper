@@ -3,9 +3,8 @@ package com.chathil.rawgapiwrapper.rawgSdk.network
 import io.ktor.client.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
+import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 class RawgApi {
     private val httpClient = HttpClient {
@@ -13,22 +12,24 @@ class RawgApi {
             val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
             serializer = KotlinxSerializer(json)
         }
+        install(Logging) {
+            logger = Logger.DEFAULT
+            level = LogLevel.ALL
+        }
     }
 
-    internal suspend fun getGames(config: GameListRequestConfig): GameListResponse {
-        return httpClient.get(GAME)
-//            config.apply {
-//                page?.let {
-//                    parameter("page", it)
-//                }
-//                pageSize?.let {
-//                    parameter("page_size", it)
-//                }
-//                search?.let {
-//                    parameter("search", it)
-//                }
-//            }
-//        }
+    internal suspend fun getGames(keyword: String?, config: GameRequestConfig): GameListResponse {
+        return httpClient.get(GAME){
+            config.apply {
+                parameter("page_size", pageSize)
+                config.order?.let {
+                    parameter("ordering", it.value)
+                }
+            }
+            keyword?.let {
+                parameter("search", it)
+            }
+        }
     }
 
     companion object {

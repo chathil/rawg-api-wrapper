@@ -9,9 +9,9 @@ internal data class GameListResponse(
     @SerialName("count")
     val count: Int,
     @SerialName("next")
-    val next: String?,
+    val next: String? = null,
     @SerialName("previous")
-    val prev: String?,
+    val prev: String? = null,
     @SerialName("results")
     val results: List<GameResponse>
 )
@@ -21,7 +21,7 @@ internal data class GameResponse(
     @SerialName("id")
     val id: Int,
     @SerialName("slug")
-    val slug: String?,
+    val slug: String? = null,
     @SerialName("name")
     val name: String,
     @SerialName("released")
@@ -29,13 +29,13 @@ internal data class GameResponse(
     @SerialName("tba")
     val tba: Boolean,
     @SerialName("background_image")
-    val backgroundImage: String?,
+    val backgroundImage: String? = null,
     @SerialName("rating")
     val rating: Float,
     @SerialName("rating_top")
     val ratingTop: Float,
     @SerialName("ratings")
-    val ratings: List<RatingResponse>,
+    val ratings: List<RatingResponse>? = emptyList(),
     @SerialName("ratings_count")
     val ratingsCount: Int,
     @SerialName("reviews_text_count")
@@ -43,7 +43,7 @@ internal data class GameResponse(
     @SerialName("added")
     val added: Int,
     @SerialName("metacritic")
-    val metacritic: Int,
+    val metacritic: Int? = 0,
     @SerialName("playtime")
     val playtime: Int,
     @SerialName("suggestions_count")
@@ -55,19 +55,19 @@ internal data class GameResponse(
     @SerialName("dominant_color")
     val dominantColor: String,
     @SerialName("platforms")
-    val platforms: List<GamePlatformResponse>,
+    val platforms: List<GamePlatformResponse>? = emptyList(),
     @SerialName("parent_platforms")
-    val parentPlatforms: List<GameParentPlatformResponse>,
+    val parentPlatforms: List<GameParentPlatformResponse>? = emptyList(),
     @SerialName("genres")
-    val genres: List<GenreResponse>,
+    val genres: List<GenreResponse>? = emptyList(),
     @SerialName("stores")
-    val stores: List<GameStoreResponse>,
+    val stores: List<GameStoreResponse>? = emptyList(),
     @SerialName("clip")
-    val clip: ClipResponse,
+    val clip: ClipResponse?,
     @SerialName("tags")
-    val tags: List<TagResponse>,
+    val tags: List<TagResponse>? = emptyList(),
     @SerialName("short_screenshots")
-    val shortScreenshots: List<ShortScreenshotResponse>
+    val shortScreenshots: List<ShortScreenshotResponse>? = emptyList()
 )
 
 @Serializable
@@ -89,17 +89,17 @@ internal data class PlatformResponse(
     @SerialName("name")
     val name: String,
     @SerialName("slug")
-    val slug: String?,
+    val slug: String? = null,
     @SerialName("image")
-    val image: String?,
+    val image: String? = null,
     @SerialName("year_end")
-    val yearEnd: Int?,
+    val yearEnd: Int? = null,
     @SerialName("year_start")
-    val yearStart: Int?,
+    val yearStart: Int? = null,
     @SerialName("games_count")
     val gamesCount: Int? = 0,
     @SerialName("image_background")
-    val imageBackground: String?,
+    val imageBackground: String? = null,
 )
 
 @Serializable
@@ -113,11 +113,11 @@ internal data class RequirementResponse(
 @Serializable
 internal data class GamePlatformResponse(
     @SerialName("platform")
-    val platform: PlatformResponse?,
+    val platform: PlatformResponse? = null,
     @SerialName("released_at")
-    val releasedAt: String,
+    val releasedAt: String? = null,
     @SerialName("requirements_en")
-    val requirementsEn: RequirementResponse?
+    val requirementsEn: RequirementResponse? = null
 )
 
 @Serializable
@@ -127,7 +127,7 @@ internal data class ParentPlatformResponse(
     @SerialName("name")
     val name: String,
     @SerialName("slug")
-    val slug: String?
+    val slug: String? = null
 )
 
 @Serializable
@@ -143,11 +143,11 @@ internal data class GenreResponse(
     @SerialName("name")
     val name: String,
     @SerialName("slug")
-    val slug: String?,
+    val slug: String? = null,
     @SerialName("games_count")
     val gamesCount: Int? = 0,
     @SerialName("image_background")
-    val imageBackground: String?
+    val imageBackground: String? = null
 )
 
 @Serializable
@@ -157,29 +157,27 @@ internal data class StoreResponse(
     @SerialName("name")
     val name: String,
     @SerialName("slug")
-    val slug: String?,
+    val slug: String? = null,
     @SerialName("domain")
-    val domain: String?,
+    val domain: String? = null,
     @SerialName("games_count")
     val gamesCount: Int? = 0,
     @SerialName("image_background")
-    val imageBackground: String?
+    val imageBackground: String? = null
 )
 
 @Serializable
 internal data class GameStoreResponse(
-    @SerialName("id")
-    val id: Int,
     @SerialName("store")
     val store: StoreResponse,
     @SerialName("url_en")
-    val urlEn: String?
+    val urlEn: String? = null
 )
 
 @Serializable
 internal data class ClipResponse(
     @SerialName("clip")
-    val clip: String?
+    val clip: String? = null
 )
 
 @Serializable
@@ -189,13 +187,13 @@ internal data class TagResponse(
     @SerialName("name")
     val name: String,
     @SerialName("slug")
-    val slug: String?,
+    val slug: String? = null,
     @SerialName("language")
-    val language: String?,
+    val language: String? = null,
     @SerialName("games_count")
     val gamesCount: Int? = 0,
     @SerialName("image_background")
-    val imageBackground: String?
+    val imageBackground: String? = null
 )
 
 @Serializable
@@ -203,5 +201,5 @@ internal data class ShortScreenshotResponse(
     @SerialName("id")
     val id: Int,
     @SerialName("image")
-    val image: String?
+    val image: String? = null
 )

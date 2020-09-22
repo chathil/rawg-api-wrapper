@@ -1,7 +1,7 @@
 package com.chathil.rawgapiwrapper.rawgSdk.cache
 
 import com.chathil.rawgapiwrapper.rawgSdk.models.Game
-import com.chathil.rawgapiwrapper.rawgSdk.network.GameListRequestConfig
+import com.chathil.rawgapiwrapper.rawgSdk.network.GameRequestConfig
 import com.chathil.rawgapiwrapper.rawgSdk.network.GameListResponse
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
@@ -11,36 +11,16 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
     private val database = RawgDatabase(databaseDriverFactory.createDriver())
     private val dbQuery = database.rawgDatabaseQueries
 
-    internal fun getAllGames(config: GameListRequestConfig): Flow<List<Game>> {
-        return dbQuery.loadAllGames { id, nextPage, prevPage, name, slug, released, tba, backgroundImage, rating, ratingTop, ratingsCount, reviewTextCount, added, metacritic, playtime, suggestionCount, reviewsCount, saturatedColor, dominantColor, clip ->
-            Game(
-                id = id,
-                next = nextPage,
-                prev = prevPage,
-                slug = slug,
-                name = name,
-                released = released,
-                tba = tba,
-                backgroundImage = backgroundImage,
-                rating = rating,
-                ratingTop = ratingTop,
-                ratingsCount = ratingsCount,
-                reviewsTextCount = reviewTextCount,
-                added = added,
-                metacritic = metacritic,
-                playtime = playtime,
-                suggestionsCount = suggestionCount,
-                reviewsCount = reviewsCount,
-                saturatedColor = saturatedColor,
-                dominantColor = dominantColor,
-                clip = clip,
-                dbQuery = dbQuery
-            )
-        }.asFlow().mapToList()
+    internal fun getAllGames(): Flow<List<Game>> {
+        return dbQuery.loadGames(::asDomainModel).asFlow().mapToList()
+    }
+
+    internal fun searchGames(keyword: String): Flow<List<Game>> {
+        return dbQuery.searchGames("%$keyword%", ::asDomainModel).asFlow().mapToList()
     }
 
     internal fun cacheGames(gameListResponse: GameListResponse) {
-        println(gameListResponse.results)
+        dbQuery.clearAllGames()
         dbQuery.transaction {
             gameListResponse.results.forEach {
                 dbQuery.insertGame(
@@ -57,15 +37,15 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
                     ratingsCount = it.ratingsCount,
                     reviewTextCount = it.reviewsCount,
                     added = it.added,
-                    metacritic = it.metacritic,
+                    metacritic = it.metacritic ?: 0,
                     playtime = it.playtime,
                     suggestionCount = it.suggestionsCount,
                     reviewsCount = it.reviewsCount,
                     saturatedColor = it.saturatedColor,
                     dominantColor = it.dominantColor,
-                    clip = it.clip.clip
+                    clip = it.clip?.clip
                 )
-                it.ratings.forEach { rating ->
+                it.ratings?.forEach { rating ->
                     dbQuery.insertRating(
                         it.id,
                         rating.title,
@@ -73,7 +53,7 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
                         rating.percent
                     )
                 }
-                it.platforms.forEach { gamePlatform ->
+                it.platforms?.forEach { gamePlatform ->
                     val platform = gamePlatform.platform
                     platform?.let { _ ->
                         dbQuery.insertPlatform(
@@ -98,10 +78,10 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
                         )
                     }
                 }
-                it.parentPlatforms.forEach { pl ->
+                it.parentPlatforms?.forEach { pl ->
                     dbQuery.insertGameParentPlatform(it.id, pl.platform.id)
                 }
-                it.genres.forEach { genre ->
+                it.genres?.forEach { genre ->
                     dbQuery.insertGenre(
                         genre.id,
                         genre.name,
@@ -111,7 +91,7 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
                     )
                     dbQuery.insertGameGenre(it.id, genre.id)
                 }
-                it.stores.forEach { store ->
+                it.stores?.forEach { store ->
                     dbQuery.insertStore(
                         store.store.id,
                         store.store.name,
@@ -123,7 +103,7 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
                     )
                     dbQuery.insertGameStore(it.id, store.store.id, store.urlEn)
                 }
-                it.tags.forEach { tag ->
+                it.tags?.forEach { tag ->
                     dbQuery.insertTag(
                         tag.id,
                         null,
@@ -136,18 +116,61 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
                     )
                     dbQuery.insertGameTag(it.id, tag.id)
                 }
-                it.shortScreenshots.forEach { screenshot ->
+                it.shortScreenshots?.forEach { screenshot ->
                     dbQuery.insertGameScreenshots(screenshot.id, it.id, screenshot.image)
                 }
             }
         }
     }
 
-    internal fun clearAllGames() {
-        dbQuery.clearAllGames()
-    }
-
     internal fun clearGame(id: Int) {
         dbQuery.clearGame(id)
     }
+
+    private fun asDomainModel(
+        id: Int,
+        nextPage: String?,
+        prevPage: String?,
+        name: String,
+        slug: String?,
+        released: String?,
+        tba: Boolean,
+        backgroundImage: String?,
+        rating: Float,
+        ratingTop: Float,
+        ratingsCount: Int,
+        reviewTextCount: Int,
+        added: Int,
+        metacritic: Int,
+        playtime: Int,
+        suggestionCount: Int,
+        reviewsCount: Int,
+        saturatedColor: String?,
+        dominantColor: String?,
+        clip: String?
+    ) =
+        Game(
+            id = id,
+            next = nextPage,
+            prev = prevPage,
+            slug = slug,
+            name = name,
+            released = released,
+            tba = tba,
+            backgroundImage = backgroundImage,
+            rating = rating,
+            ratingTop = ratingTop,
+            ratingsCount = ratingsCount,
+            reviewsTextCount = reviewTextCount,
+            added = added,
+            metacritic = metacritic,
+            playtime = playtime,
+            suggestionsCount = suggestionCount,
+            reviewsCount = reviewsCount,
+            saturatedColor = saturatedColor,
+            dominantColor = dominantColor,
+            clip = clip,
+            dbQuery = dbQuery
+        )
+
 }
