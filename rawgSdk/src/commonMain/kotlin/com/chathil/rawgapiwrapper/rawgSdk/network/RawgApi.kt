@@ -63,6 +63,22 @@ class RawgApi {
         }
     }
 
+//    TODO add all this endpoints
+//    Get a list of games that are part of the same series.
+//    https://api.rawg.io/api/games/{game_pk}/game-series
+
+//    Get details of the game.
+//    https://api.rawg.io/api/games/{id}
+
+//    Get a list of game achievements.
+//    https://api.rawg.io/api/games/{id}/achievements
+
+//    Get a list of most recent posts from the game's subreddit.
+//    https://api.rawg.io/api/games/{id}/reddit
+
+//    Get a list of visually similar games.
+//    https://api.rawg.io/api/games/{id}/suggested
+
     companion object {
         private const val BASE_URL = "https://api.rawg.io/api"
         private const val GAME = "${BASE_URL}/games"
