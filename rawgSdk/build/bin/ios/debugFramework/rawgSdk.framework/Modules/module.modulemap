@@ -1,0 +1,6 @@
+framework module rawgSdk {
+    umbrella header "rawgSdk.h"
+
+    export *
+    module * { export * }
+}
