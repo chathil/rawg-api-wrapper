@@ -6,7 +6,6 @@ import android.util.Log
 
 import com.chathil.rawgapiwrapper.rawgSdk.RawgSDK
 import com.chathil.rawgapiwrapper.rawgSdk.cache.DatabaseDriverFactory
-import com.chathil.rawgapiwrapper.rawgSdk.network.GameRequestConfig
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collect
@@ -23,12 +22,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         mainScope.launch {
-            sdk.getGames(search = "GTA", config = GameRequestConfig(order = GameRequestConfig.Order.NAME_ASC)).collect{
+            sdk.gamesByPlatform(setOf(4, 187)).collect {
                 Log.d(TAG, "onCreate: $it")
             }
-//            val res = sdk.getGames(true, mapOf())
-//            Log.d(TAG, "onCreate: $res")
-//            Log.d(TAG, "onCreate: Ratings :${res.rat} ")
         }
     }
 

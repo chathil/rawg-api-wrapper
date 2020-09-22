@@ -476,11 +476,47 @@ SELECT DISTINCT Game.*
 FROM Game
 WHERE Game.name LIKE  ?;
 
-gamesFromPublishers:
+gamesByPublisher:
+SELECT DISTINCT Game.*
+FROM Game
+JOIN Game_Publisher ON Game.id = Game_Publisher.gameId
+WHERE Game_Publisher.publisherId = ?;
+
+gamesByPlatforms:
 SELECT DISTINCT Game.*
 FROM Game
 JOIN Game_Platform ON Game.id = Game_Platform.gameId
 WHERE Game_Platform.platformId IN ?;
+
+gamesByParentPlatforms:
+SELECT DISTINCT Game.*
+FROM Game
+JOIN Game_ParentPlatform ON Game.id = Game_ParentPlatform.gameId
+WHERE Game_ParentPlatform.platformId IN ?;
+
+gamesByDevelopers:
+SELECT DISTINCT Game.*
+FROM Game
+JOIN Game_Developer ON Game.id = Game_Developer.gameId
+WHERE Game_Developer.developerId IN ?;
+
+gamesByGenres:
+SELECT DISTINCT Game.*
+FROM Game
+JOIN Game_Genre ON Game.id = Game_Genre.gameId
+WHERE Game_Genre.genreId IN ?;
+
+gamesByTags:
+SELECT DISTINCT Game.*
+FROM Game
+JOIN Game_Tag ON Game.id = Game_Tag.gameId
+WHERE Game_Tag.tagId IN ?;
+
+gamesByStores:
+SELECT DISTINCT Game.*
+FROM Game
+JOIN Game_Store ON Game.id = Game_Store.gameId
+WHERE Game_Store.storeId IN ?;
 
 loadGame:
 SELECT * FROM Game

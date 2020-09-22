@@ -19,41 +19,62 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
         return dbQuery.searchGames("%$keyword%", ::asDomainModel).asFlow().mapToList()
     }
 
-    internal fun cacheGames(gameListResponse: GameListResponse) {
+    internal fun gamesByPublisher(publisherId: Int): Flow<List<Game>> {
+        return dbQuery.gamesByPublisher(publisherId, ::asDomainModel).asFlow().mapToList()
+    }
+
+    internal fun gamesByPlatform(platformIds: Set<Int>): Flow<List<Game>> {
+        return dbQuery.gamesByPlatforms(platformIds, ::asDomainModel).asFlow().mapToList()
+    }
+
+    internal fun gamesByParentPlatforms(parentPlatformIds: Set<Int>): Flow<List<Game>> {
+        return dbQuery.gamesByParentPlatforms(parentPlatformIds, ::asDomainModel).asFlow().mapToList()
+    }
+
+    internal fun gamesByDevelopers(developerIds: Set<Int>): Flow<List<Game>> {
+        return dbQuery.gamesByDevelopers(developerIds, ::asDomainModel).asFlow().mapToList()
+    }
+
+    internal fun gamesByGenres(genreIds: Set<Int>): Flow<List<Game>> {
+        return dbQuery.gamesByGenres(genreIds, ::asDomainModel).asFlow().mapToList()
+    }
+    internal fun gamesByTags(tagIds: Set<Int>) = dbQuery.gamesByTags(tagIds, ::asDomainModel).asFlow().mapToList()
+
+    internal fun cacheGames(gameListResponse: GameListResponse, publisherId: Int? = null) {
         dbQuery.clearAllGames()
         dbQuery.transaction {
-            gameListResponse.results.forEach {
+            gameListResponse.results.forEach { game ->
                 dbQuery.insertGame(
-                    id = it.id,
+                    id = game.id,
                     nextPage = gameListResponse.next,
                     prevPage = gameListResponse.prev,
-                    name = it.name,
-                    slug = it.slug,
-                    released = it.released,
-                    tba = it.tba,
-                    backgroundImage = it.backgroundImage,
-                    rating = it.rating,
-                    ratingTop = it.ratingTop,
-                    ratingsCount = it.ratingsCount,
-                    reviewTextCount = it.reviewsCount,
-                    added = it.added,
-                    metacritic = it.metacritic ?: 0,
-                    playtime = it.playtime,
-                    suggestionCount = it.suggestionsCount,
-                    reviewsCount = it.reviewsCount,
-                    saturatedColor = it.saturatedColor,
-                    dominantColor = it.dominantColor,
-                    clip = it.clip?.clip
+                    name = game.name,
+                    slug = game.slug,
+                    released = game.released,
+                    tba = game.tba,
+                    backgroundImage = game.backgroundImage,
+                    rating = game.rating,
+                    ratingTop = game.ratingTop,
+                    ratingsCount = game.ratingsCount,
+                    reviewTextCount = game.reviewsCount,
+                    added = game.added,
+                    metacritic = game.metacritic ?: 0,
+                    playtime = game.playtime,
+                    suggestionCount = game.suggestionsCount,
+                    reviewsCount = game.reviewsCount,
+                    saturatedColor = game.saturatedColor,
+                    dominantColor = game.dominantColor,
+                    clip = game.clip?.clip
                 )
-                it.ratings?.forEach { rating ->
+                game.ratings?.forEach { rating ->
                     dbQuery.insertRating(
-                        it.id,
+                        game.id,
                         rating.title,
                         rating.count,
                         rating.percent
                     )
                 }
-                it.platforms?.forEach { gamePlatform ->
+                game.platforms?.forEach { gamePlatform ->
                     val platform = gamePlatform.platform
                     platform?.let { _ ->
                         dbQuery.insertPlatform(
@@ -70,7 +91,7 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
                             following = false
                         )
                         dbQuery.insertGamePlatform(
-                            it.id,
+                            game.id,
                             platform.id,
                             gamePlatform.releasedAt,
                             gamePlatform.requirementsEn?.minimum,
@@ -78,10 +99,10 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
                         )
                     }
                 }
-                it.parentPlatforms?.forEach { pl ->
-                    dbQuery.insertGameParentPlatform(it.id, pl.platform.id)
+                game.parentPlatforms?.forEach { pl ->
+                    dbQuery.insertGameParentPlatform(game.id, pl.platform.id)
                 }
-                it.genres?.forEach { genre ->
+                game.genres?.forEach { genre ->
                     dbQuery.insertGenre(
                         genre.id,
                         genre.name,
@@ -89,9 +110,9 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
                         genre.gamesCount ?: 0,
                         genre.imageBackground
                     )
-                    dbQuery.insertGameGenre(it.id, genre.id)
+                    dbQuery.insertGameGenre(game.id, genre.id)
                 }
-                it.stores?.forEach { store ->
+                game.stores?.forEach { store ->
                     dbQuery.insertStore(
                         store.store.id,
                         store.store.name,
@@ -101,9 +122,9 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
                         store.store.imageBackground,
                         false
                     )
-                    dbQuery.insertGameStore(it.id, store.store.id, store.urlEn)
+                    dbQuery.insertGameStore(game.id, store.store.id, store.urlEn)
                 }
-                it.tags?.forEach { tag ->
+                game.tags?.forEach { tag ->
                     dbQuery.insertTag(
                         tag.id,
                         null,
@@ -114,10 +135,13 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
                         tag.language,
                         tag.imageBackground
                     )
-                    dbQuery.insertGameTag(it.id, tag.id)
+                    dbQuery.insertGameTag(game.id, tag.id)
                 }
-                it.shortScreenshots?.forEach { screenshot ->
-                    dbQuery.insertGameScreenshots(screenshot.id, it.id, screenshot.image)
+                game.shortScreenshots?.forEach { screenshot ->
+                    dbQuery.insertGameScreenshots(screenshot.id, game.id, screenshot.image)
+                }
+                publisherId?.let {
+                    dbQuery.insertGamePublisher(game.id, it)
                 }
             }
         }
