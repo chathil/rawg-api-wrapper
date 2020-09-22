@@ -15,3 +15,5 @@
 local.properties
 /rawgSdk/build/generated/sqldelight/
 /rawgSdk/build/
+/.idea/
+/androidApp/build/

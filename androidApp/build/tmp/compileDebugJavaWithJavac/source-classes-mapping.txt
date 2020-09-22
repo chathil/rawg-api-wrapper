@@ -1,2 +1,0 @@
-com/chathil/rawgapiwrapper/androidApp/BuildConfig.java
- com.chathil.rawgapiwrapper.androidApp.BuildConfig
