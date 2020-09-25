@@ -13,7 +13,7 @@ internal data class GameListResponse(
     @SerialName("previous")
     val prev: String? = null,
     @SerialName("results")
-    val results: List<GameResponse>
+    val results: Set<GameResponse>
 )
 
 @Serializable
@@ -25,7 +25,7 @@ internal data class GameResponse(
     @SerialName("name")
     val name: String,
     @SerialName("released")
-    val released: String,
+    val released: String?,
     @SerialName("tba")
     val tba: Boolean,
     @SerialName("background_image")

@@ -131,7 +131,7 @@ CREATE TABLE Game_Platform (
     minimumRequirement TEXT,
     recommendedRequirement TEXT,
     PRIMARY KEY (gameId, platformId),
-    FOREIGN KEY (gameId) REFERENCES Game(id),
+    FOREIGN KEY (gameId) REFERENCES Game(apiId),
     FOREIGN KEY (platformId) REFERENCES Platform(id)
 );
 
@@ -152,7 +152,7 @@ CREATE TABLE Game_ParentPlatform (
     gameId INTEGER AS Int NOT NULL,
     platformId INTEGER AS Int NOT NULL,
     PRIMARY KEY (gameId, platformId),
-    FOREIGN KEY (gameId) REFERENCES Game(id),
+    FOREIGN KEY (gameId) REFERENCES Game(apiId),
     FOREIGN KEY (platformId) REFERENCES Platform(id)
 );
 
@@ -199,7 +199,7 @@ CREATE TABLE Game_Store (
     storeId INTEGER AS Int NOT NULL,
     url TEXT,
     PRIMARY KEY (gameId, storeId),
-    FOREIGN KEY (gameId) REFERENCES Game(id),
+    FOREIGN KEY (gameId) REFERENCES Game(apiId),
     FOREIGN KEY (storeId) REFERENCES Store(id)
 );
 
@@ -242,7 +242,7 @@ CREATE TABLE Game_Genre (
     gameId INTEGER AS Int NOT NULL,
     genreId INTEGER AS Int NOT NULL,
     PRIMARY KEY (gameId, genreId),
-    FOREIGN KEY (gameId) REFERENCES Game(id),
+    FOREIGN KEY (gameId) REFERENCES Game(apiId),
     FOREIGN KEY (genreId) REFERENCES Genre(id)
 );
 
@@ -291,7 +291,7 @@ CREATE TABLE Game_Developer (
     gameId INTEGER AS Int NOT NULL,
     developerId INTEGER AS Int NOT NULL,
     PRIMARY KEY (gameId, developerId),
-    FOREIGN KEY (gameId) REFERENCES Game(id),
+    FOREIGN KEY (gameId) REFERENCES Game(apiId),
     FOREIGN KEY (developerId) REFERENCES Developer(id)
 );
 
@@ -331,7 +331,7 @@ CREATE TABLE Game_Tag (
     gameId INTEGER AS Int NOT NULL,
     tagId INTEGER AS Int NOT NULL,
     PRIMARY KEY (gameId, tagId),
-    FOREIGN KEY (gameId) REFERENCES Game(id),
+    FOREIGN KEY (gameId) REFERENCES Game(apiId),
     FOREIGN KEY (tagId) REFERENCES Tag(id)
 );
 
@@ -376,7 +376,7 @@ CREATE TABLE Game_Publisher (
     gameId INTEGER AS Int NOT NULL,
     publisherId INTEGER AS Int NOT NULL,
     PRIMARY KEY (gameId, publisherId),
-    FOREIGN KEY (gameId) REFERENCES Game(id),
+    FOREIGN KEY (gameId) REFERENCES Game(apiId),
     FOREIGN KEY (publisherId) REFERENCES Publisher(id)
 );
 
@@ -391,7 +391,7 @@ CREATE TABLE Game_Screenshot (
     id INTEGER AS Int PRIMARY KEY AUTOINCREMENT,
     gameId INTEGER AS Int NOT NULL,
     url TEXT,
-    FOREIGN KEY (gameId) REFERENCES Game(id)
+    FOREIGN KEY (gameId) REFERENCES Game(apiId)
 );
 
 insertGameScreenshots:
@@ -425,7 +425,7 @@ CREATE TABLE GameDetail(
     youtubeCount INTEGER AS Int NOT NULL DEFAULT 0,
     additionsCount INTEGER AS Int NOT NULL DEFAULT 0,
     seriesCount INTEGER As Int NOT NULL DEFAULT 0,
-    FOREIGN KEY (id) REFERENCES Game(id)
+    FOREIGN KEY (id) REFERENCES Game(apiId)
 );
 
 insertGameDetail:
@@ -444,8 +444,9 @@ clearGameDetails:
 DELETE FROM GameDetail;
 
 CREATE TABLE Game (
-    id INTEGER AS Int PRIMARY KEY,
+    apiId INTEGER AS Int PRIMARY KEY,
     nextPage TEXT,
+    page INTEGER AS Int NOT NULL,
     prevPage TEXT,
     name TEXT NOT NULL,
     slug TEXT,
@@ -463,72 +464,77 @@ CREATE TABLE Game (
     reviewsCount INTEGER AS Int NOT NULL DEFAULT 0,
     saturatedColor TEXT,
     dominantColor TEXT,
-    clip TEXT
+    clip TEXT,
+    param TEXT
 );
 
 loadGames:
 SELECT Game.*
-FROM Game;
+FROM Game
+WHERE Game.param = 'all'
+AND Game.page = ?;
 
 -- Missing game creator from game detail
 searchGames:
 SELECT DISTINCT Game.*
 FROM Game
-WHERE Game.name LIKE  ?;
+WHERE Game.name LIKE ?
+AND Game.param = ?
+AND Game.page = ?;
 
 gamesByPublisher:
 SELECT DISTINCT Game.*
 FROM Game
-JOIN Game_Publisher ON Game.id = Game_Publisher.gameId
+JOIN Game_Publisher ON Game.apiId = Game_Publisher.gameId
 WHERE Game_Publisher.publisherId = ?;
 
 gamesByPlatforms:
 SELECT DISTINCT Game.*
 FROM Game
-JOIN Game_Platform ON Game.id = Game_Platform.gameId
+JOIN Game_Platform ON Game.apiId = Game_Platform.gameId
 WHERE Game_Platform.platformId IN ?;
 
 gamesByParentPlatforms:
 SELECT DISTINCT Game.*
 FROM Game
-JOIN Game_ParentPlatform ON Game.id = Game_ParentPlatform.gameId
+JOIN Game_ParentPlatform ON Game.apiId = Game_ParentPlatform.gameId
 WHERE Game_ParentPlatform.platformId IN ?;
 
 gamesByDevelopers:
 SELECT DISTINCT Game.*
 FROM Game
-JOIN Game_Developer ON Game.id = Game_Developer.gameId
+JOIN Game_Developer ON Game.apiId = Game_Developer.gameId
 WHERE Game_Developer.developerId IN ?;
 
 gamesByGenres:
 SELECT DISTINCT Game.*
 FROM Game
-JOIN Game_Genre ON Game.id = Game_Genre.gameId
+JOIN Game_Genre ON Game.apiId = Game_Genre.gameId
 WHERE Game_Genre.genreId IN ?;
 
 gamesByTags:
 SELECT DISTINCT Game.*
 FROM Game
-JOIN Game_Tag ON Game.id = Game_Tag.gameId
+JOIN Game_Tag ON Game.apiId = Game_Tag.gameId
 WHERE Game_Tag.tagId IN ?;
 
 gamesByStores:
 SELECT DISTINCT Game.*
 FROM Game
-JOIN Game_Store ON Game.id = Game_Store.gameId
+JOIN Game_Store ON Game.apiId = Game_Store.gameId
 WHERE Game_Store.storeId IN ?;
 
 loadGame:
 SELECT * FROM Game
-WHERE id = ?;
+WHERE apiId = ?;
 
 insertGame:
 INSERT OR REPLACE INTO Game
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 clearGame:
 DELETE FROM Game
-WHERE id = ?;
+WHERE apiId = ?;
 
 clearAllGames:
 DELETE FROM Game;

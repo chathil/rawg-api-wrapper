@@ -1,29 +1,79 @@
 package com.chathil.rawgapiwrapper.androidApp
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.compose.foundation.Text
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.setContent
+import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
+import androidx.ui.tooling.preview.Preview
+import com.chathil.rawgapiwrapper.androidApp.ui.RawgWrapperTheme
 
 import com.chathil.rawgapiwrapper.rawgSdk.RawgSDK
 import com.chathil.rawgapiwrapper.rawgSdk.cache.DatabaseDriverFactory
+import com.chathil.rawgapiwrapper.rawgSdk.models.Game
+
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlin.coroutines.suspendCoroutine
 
-
-class MainActivity : AppCompatActivity() {
+// TODO this is just a bad example to find out if the sdk works.
+// should be updated to show compose best practices.
+class MainActivity : FragmentActivity() {
     private val mainScope = MainScope()
-
     private val sdk = RawgSDK(DatabaseDriverFactory(this))
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        mainScope.launch {
-            sdk.gamesByPlatform(setOf(4, 187)).collect {
-                Log.d(TAG, "onCreate: $it")
+        setContent {
+            RawgWrapperTheme {
+                HomeScreen()
+            }
+        }
+    }
+
+    @Composable
+    private fun HomeScreen() {
+        var games: List<Game> by remember {
+            mutableStateOf(
+                listOf()
+            )
+        }
+        onActive {
+            mainScope.launch {
+                sdk.paginatedGames("word").init().collect {
+                    if (games.isNullOrEmpty()) {
+                        games = games + (it.data ?: emptyList())
+                    }
+                }
+            }
+        }
+        Surface(
+            color = MaterialTheme.colors.background,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            LazyColumnForIndexed(items = games) { index, item ->
+                if (index == games.size - 5) {
+                    onActive {
+                        mainScope.launch {
+                            sdk.paginatedGames("word").next(item.next ?: 1).collect {
+                                if (!games.containsAll(it.data ?: emptyList()))
+                                    games = games + (it.data ?: emptyList())
+                            }
+                        }
+                    }
+                }
+                Text("${item.next} ${item.id} ${item.name}", modifier = Modifier.padding(vertical = 16.dp))
             }
         }
     }
@@ -35,5 +85,18 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         val TAG = MainActivity::class.java.simpleName
+    }
+}
+
+@Composable
+fun Greeting(name: String) {
+    Text(text = "Hello $name!")
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    RawgWrapperTheme {
+        Greeting("Android")
     }
 }

@@ -1,5 +1,8 @@
 package com.chathil.rawgapiwrapper.rawgSdk.network
 
+import com.chathil.rawgapiwrapper.rawgSdk.models.Game
+import com.chathil.rawgapiwrapper.rawgSdk.vo.Resource
+import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -7,11 +10,8 @@ interface RequestConfig {
     val forceReload: Boolean
 }
 
-@Serializable
 data class GameRequestConfig(
-//    @SerialName("page")
-//    val page: Int? = null, TODO enable page when there's a multiplatform paging lib
-    @SerialName("page_size")
+    val page: Int = 1,
     val pageSize: Int = 20,
     override val forceReload: Boolean = true,
 //    val dates: Set<Int>, TODO date config
@@ -35,5 +35,11 @@ data class GameRequestConfig(
         RATING_DESC("-rating"),
     }
 }
+
+data class PaginatedGameRequest(
+    val init: () -> Flow<Resource<List<Game>>>,
+    val next: (nextPage: Int) -> Flow<Resource<List<Game>>>
+)
+
 
 

@@ -14,7 +14,7 @@ class RawgApi {
         }
         install(Logging) {
             logger = Logger.DEFAULT
-            level = LogLevel.ALL
+            level = LogLevel.BODY
         }
     }
 
@@ -38,6 +38,7 @@ class RawgApi {
                 config.order?.let {
                     parameter("ordering", it.value)
                 }
+                parameter("page", page)
             }
             keyword?.let {
                 parameter("search", it)
@@ -63,6 +64,13 @@ class RawgApi {
         }
     }
 
+    internal suspend fun getGameEditions(gameId: Int, config: GameRequestConfig): GameListResponse {
+        return httpClient.get("$GAME/$gameId/additions") {
+            parameter("page", config.page)
+            parameter("page_size", config.pageSize)
+        }
+    }
+
 //    TODO add all this endpoints
 //    Get a list of games that are part of the same series.
 //    https://api.rawg.io/api/games/{game_pk}/game-series
@@ -78,6 +86,7 @@ class RawgApi {
 
 //    Get a list of visually similar games.
 //    https://api.rawg.io/api/games/{id}/suggested
+
 
     companion object {
         private const val BASE_URL = "https://api.rawg.io/api"

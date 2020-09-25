@@ -3,7 +3,7 @@ package com.chathil.rawgapiwrapper.rawgSdk.network
 import com.chathil.rawgapiwrapper.rawgSdk.vo.Resource
 import kotlinx.coroutines.flow.*
 
-inline fun <ResultType, RequestType> networkBoundResource(
+internal inline fun <ResultType, RequestType> networkBoundResource(
     crossinline query: () -> Flow<ResultType>,
     crossinline fetch: suspend () -> RequestType,
     crossinline saveFetchResult: suspend (RequestType) -> Unit,

@@ -1,11 +1,10 @@
 package com.chathil.rawgapiwrapper.rawgSdk.models
 
-import com.chathil.rawgapiwrapper.rawgSdk.cache.RawgDatabaseQueries
-
 data class Game(
+    val index: Int,
     val id: Int,
-    val next: String?,
-    val prev: String?,
+    val next: Int?,
+    val prev: Int?,
     val slug: String?,
     val name: String,
     val released: String?,
@@ -30,7 +29,42 @@ data class Game(
     val clip: String?,
     val tags: () -> List<Tag>,
     val shortScreenshots: () -> List<ShortScreenshot>
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        return id == (other as Game).id
+    }
+
+    override fun hashCode(): Int {
+        var result = index
+        result = 31 * result + (next ?: 0)
+        result = 31 * result + (prev ?: 0)
+        result = 31 * result + (slug?.hashCode() ?: 0)
+        result = 31 * result + name.hashCode()
+        result = 31 * result + (released?.hashCode() ?: 0)
+        result = 31 * result + tba.hashCode()
+        result = 31 * result + (backgroundImage?.hashCode() ?: 0)
+        result = 31 * result + rating.hashCode()
+        result = 31 * result + ratingTop.hashCode()
+        result = 31 * result + ratings.hashCode()
+        result = 31 * result + ratingsCount
+        result = 31 * result + reviewsTextCount
+        result = 31 * result + added
+        result = 31 * result + metacritic
+        result = 31 * result + playtime
+        result = 31 * result + suggestionsCount
+        result = 31 * result + reviewsCount
+        result = 31 * result + (saturatedColor?.hashCode() ?: 0)
+        result = 31 * result + (dominantColor?.hashCode() ?: 0)
+        result = 31 * result + platforms.hashCode()
+        result = 31 * result + parentPlatform.hashCode()
+        result = 31 * result + genres.hashCode()
+        result = 31 * result + stores.hashCode()
+        result = 31 * result + (clip?.hashCode() ?: 0)
+        result = 31 * result + tags.hashCode()
+        result = 31 * result + shortScreenshots.hashCode()
+        return result
+    }
+}
 
 data class Rating(
     val id: Int,
