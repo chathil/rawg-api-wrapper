@@ -479,50 +479,64 @@ searchGames:
 SELECT DISTINCT Game.*
 FROM Game
 WHERE Game.name LIKE ?
-AND Game.param = ?
+AND Game.param = 'search'
 AND Game.page = ?;
 
 gamesByPublisher:
 SELECT DISTINCT Game.*
 FROM Game
 JOIN Game_Publisher ON Game.apiId = Game_Publisher.gameId
-WHERE Game_Publisher.publisherId = ?;
+WHERE Game_Publisher.publisherId = ?
+AND Game.param = 'publishers'
+AND Game.page = ?;
 
 gamesByPlatforms:
 SELECT DISTINCT Game.*
 FROM Game
 JOIN Game_Platform ON Game.apiId = Game_Platform.gameId
-WHERE Game_Platform.platformId IN ?;
+WHERE Game_Platform.platformId IN ?
+AND Game.param = 'platforms'
+AND Game.page = ?;
 
 gamesByParentPlatforms:
 SELECT DISTINCT Game.*
 FROM Game
 JOIN Game_ParentPlatform ON Game.apiId = Game_ParentPlatform.gameId
-WHERE Game_ParentPlatform.platformId IN ?;
+WHERE Game_ParentPlatform.platformId IN ?
+AND Game.param = 'parent_platforms'
+AND Game.page = ?;
 
 gamesByDevelopers:
 SELECT DISTINCT Game.*
 FROM Game
 JOIN Game_Developer ON Game.apiId = Game_Developer.gameId
-WHERE Game_Developer.developerId IN ?;
+WHERE Game_Developer.developerId IN ?
+AND Game.param = 'developers'
+AND Game.page = ?;
 
 gamesByGenres:
 SELECT DISTINCT Game.*
 FROM Game
 JOIN Game_Genre ON Game.apiId = Game_Genre.gameId
-WHERE Game_Genre.genreId IN ?;
+WHERE Game_Genre.genreId IN ?
+AND Game.param = 'genres'
+AND Game.page = ?;
 
 gamesByTags:
 SELECT DISTINCT Game.*
 FROM Game
 JOIN Game_Tag ON Game.apiId = Game_Tag.gameId
-WHERE Game_Tag.tagId IN ?;
+WHERE Game_Tag.tagId IN ?
+AND Game.param = 'tags'
+AND Game.page = ?;
 
 gamesByStores:
 SELECT DISTINCT Game.*
 FROM Game
 JOIN Game_Store ON Game.apiId = Game_Store.gameId
-WHERE Game_Store.storeId IN ?;
+WHERE Game_Store.storeId IN ?
+AND Game.param = 'stores'
+AND Game.page = ?;
 
 loadGame:
 SELECT * FROM Game

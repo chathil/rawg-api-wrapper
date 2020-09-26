@@ -17,26 +17,27 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
         dbQuery.loadGames(page, ::asDomainModel).asFlow().mapToList()
 
     internal fun searchGames(keyword: String, page: Int) =
-        dbQuery.searchGames("%$keyword%", "search", page, ::asDomainModel)
+        dbQuery.searchGames("%$keyword%", page, ::asDomainModel)
             .asFlow().mapToList()
 
-    internal fun gamesByPublisher(publisherId: Int) =
-        dbQuery.gamesByPublisher(publisherId, ::asDomainModel).asFlow().mapToList()
+    internal fun gamesByPublisher(publisherId: Int, page: Int) =
+        dbQuery.gamesByPublisher(publisherId, page, ::asDomainModel).asFlow().mapToList()
 
-    internal fun gamesByPlatform(platformIds: Set<Int>) =
-        dbQuery.gamesByPlatforms(platformIds, ::asDomainModel).asFlow().mapToList()
+    internal fun gamesByPlatform(platformIds: Set<Int>, page: Int) =
+        dbQuery.gamesByPlatforms(platformIds, page, ::asDomainModel).asFlow().mapToList()
 
-    internal fun gamesByParentPlatforms(parentPlatformIds: Set<Int>) =
-        dbQuery.gamesByParentPlatforms(parentPlatformIds, ::asDomainModel).asFlow().mapToList()
+    internal fun gamesByParentPlatforms(parentPlatformIds: Set<Int>, page: Int) =
+        dbQuery.gamesByParentPlatforms(parentPlatformIds, page, ::asDomainModel).asFlow()
+            .mapToList()
 
-    internal fun gamesByDevelopers(developerIds: Set<Int>) =
-        dbQuery.gamesByDevelopers(developerIds, ::asDomainModel).asFlow().mapToList()
+    internal fun gamesByDevelopers(developerIds: Set<Int>, page: Int) =
+        dbQuery.gamesByDevelopers(developerIds, page, ::asDomainModel).asFlow().mapToList()
 
-    internal fun gamesByGenres(genreIds: Set<Int>) =
-        dbQuery.gamesByGenres(genreIds, ::asDomainModel).asFlow().mapToList()
+    internal fun gamesByGenres(genreIds: Set<Int>, page: Int) =
+        dbQuery.gamesByGenres(genreIds, page, ::asDomainModel).asFlow().mapToList()
 
-    internal fun gamesByTags(tagIds: Set<Int>) =
-        dbQuery.gamesByTags(tagIds, ::asDomainModel).asFlow().mapToList()
+    internal fun gamesByTags(tagIds: Set<Int>, page: Int) =
+        dbQuery.gamesByTags(tagIds, page, ::asDomainModel).asFlow().mapToList()
 
     private fun gameRatings(forGame: Int) =
         dbQuery.loadRatingsForGame(forGame) { id: Int,

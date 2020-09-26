@@ -1,7 +1,6 @@
 package com.chathil.rawgapiwrapper.androidApp
 
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -22,10 +21,8 @@ import com.chathil.rawgapiwrapper.rawgSdk.models.Game
 
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlin.coroutines.suspendCoroutine
 
 // TODO this is just a bad example to find out if the sdk works.
 // should be updated to show compose best practices.
@@ -51,7 +48,7 @@ class MainActivity : FragmentActivity() {
         }
         onActive {
             mainScope.launch {
-                sdk.paginatedGames("word").init().collect {
+                sdk.paginatedGamesByParentPlatforms(setOf(1, 2)).init().collect {
                     if (games.isNullOrEmpty()) {
                         games = games + (it.data ?: emptyList())
                     }
@@ -65,10 +62,12 @@ class MainActivity : FragmentActivity() {
             LazyColumnForIndexed(items = games) { index, item ->
                 if (index == games.size - 5) {
                     onActive {
-                        mainScope.launch {
-                            sdk.paginatedGames("word").next(item.next ?: 1).collect {
-                                if (!games.containsAll(it.data ?: emptyList()))
-                                    games = games + (it.data ?: emptyList())
+                        item.next?.let { page ->
+                            mainScope.launch {
+                                sdk.paginatedGamesByParentPlatforms(setOf(1, 2)).next(page).collect {
+                                    if (!games.containsAll(it.data ?: emptyList()))
+                                        games = games + (it.data ?: emptyList())
+                                }
                             }
                         }
                     }

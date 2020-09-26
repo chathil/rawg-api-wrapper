@@ -1,5 +1,6 @@
 package com.chathil.rawgapiwrapper.rawgSdk.network
 
+import com.chathil.rawgapiwrapper.rawgSdk.utils.toRequestParam
 import io.ktor.client.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
@@ -47,19 +48,19 @@ class RawgApi {
                 parameter("publishers", it)
             }
             platformIds?.let {
-                parameter("platform", it.toString().subSequence(1, it.toString().length))
+                parameter("platforms", it.toRequestParam())
             }
             parentPlatformIds?.let {
-                parameter("parent_platforms", it.toString().subSequence(1, it.toString().length))
+                parameter("parent_platforms", it.toRequestParam())
             }
             developerIds?.let {
-                parameter("developers", it.toString().subSequence(1, it.toString().length))
+                parameter("developers", it.toRequestParam())
             }
             genreIds?.let {
-                parameter("genres", it.toString().subSequence(1, it.toString().length))
+                parameter("genres", it.toRequestParam())
             }
             tagIds?.let {
-                parameter("tags", it.toString().subSequence(1, it.toString().length))
+                parameter("tags", it.toRequestParam())
             }
         }
     }
