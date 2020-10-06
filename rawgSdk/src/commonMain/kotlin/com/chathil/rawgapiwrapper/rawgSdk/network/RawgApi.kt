@@ -65,18 +65,16 @@ class RawgApi {
         }
     }
 
-    internal suspend fun gameAdditions(gameId: Int, config: GameRequestConfig): GameListResponse {
-        return httpClient.get("$GAME/$gameId/additions") {
+    internal suspend fun gameExtras(gameId: Int, param: String, config: GameRequestConfig): GameListResponse {
+        return httpClient.get("$GAME/$gameId/$param") {
             parameter("page", config.page)
             parameter("page_size", config.pageSize)
         }
     }
 
 //    TODO add all this endpoints
-
-//    Get a list of games that are part of the same series.
-//    https://api.rawg.io/api/games/{game_pk}/game-series
-
+// additions
+    // game-series
 //    Get details of the game.
 //    https://api.rawg.io/api/games/{id}
 
