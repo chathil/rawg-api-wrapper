@@ -13,7 +13,7 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
     private val database = RawgDatabase(databaseDriverFactory.createDriver())
     private val dbQuery = database.rawgDatabaseQueries
 
-    internal fun getAllGames(page: Int) =
+    internal fun allGames(page: Int) =
         dbQuery.loadGames(page, ::asDomainModel).asFlow().mapToList()
 
     internal fun searchGames(keyword: String, page: Int) =
@@ -47,6 +47,9 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
                                               percent: Float ->
             RatingModel(id, gameId, title, count, percent)
         }.executeAsList()
+
+    internal fun gameExtras(forGame: Int, group: String) =
+        dbQuery.loadGameExtras("${forGame}/${group}", ::asDomainModel).asFlow().mapToList()
 
     private fun gamePlatforms(forGame: Int) =
         dbQuery.loadPlatformsForGame(forGame) { gameId: Int,

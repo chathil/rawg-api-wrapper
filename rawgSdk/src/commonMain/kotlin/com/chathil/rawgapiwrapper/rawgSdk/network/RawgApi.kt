@@ -23,7 +23,7 @@ class RawgApi {
      * TODO For now only one the id sets can be set at a time.
      * Make this able to set multiple params at a time.
      */
-    internal suspend fun getGames(
+    internal suspend fun allGames(
         keyword: String? = null,
         publishersId: Int? = null,
         platformIds: Set<Int>? = null,
@@ -65,7 +65,7 @@ class RawgApi {
         }
     }
 
-    internal suspend fun getGameEditions(gameId: Int, config: GameRequestConfig): GameListResponse {
+    internal suspend fun gameAdditions(gameId: Int, config: GameRequestConfig): GameListResponse {
         return httpClient.get("$GAME/$gameId/additions") {
             parameter("page", config.page)
             parameter("page_size", config.pageSize)
@@ -73,6 +73,7 @@ class RawgApi {
     }
 
 //    TODO add all this endpoints
+
 //    Get a list of games that are part of the same series.
 //    https://api.rawg.io/api/games/{game_pk}/game-series
 

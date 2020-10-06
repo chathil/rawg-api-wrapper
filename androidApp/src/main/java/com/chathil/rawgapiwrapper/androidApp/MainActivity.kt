@@ -48,7 +48,7 @@ class MainActivity : FragmentActivity() {
         }
         onActive {
             mainScope.launch {
-                sdk.paginatedGamesByParentPlatforms(setOf(1, 2)).init().collect {
+                sdk.paginatedGameAdditions(3498).init().collect {
                     if (games.isNullOrEmpty()) {
                         games = games + (it.data ?: emptyList())
                     }
@@ -64,7 +64,7 @@ class MainActivity : FragmentActivity() {
                     onActive {
                         item.next?.let { page ->
                             mainScope.launch {
-                                sdk.paginatedGamesByParentPlatforms(setOf(1, 2)).next(page).collect {
+                                sdk.paginatedGameAdditions(3498).next(page).collect {
                                     if (!games.containsAll(it.data ?: emptyList()))
                                         games = games + (it.data ?: emptyList())
                                 }

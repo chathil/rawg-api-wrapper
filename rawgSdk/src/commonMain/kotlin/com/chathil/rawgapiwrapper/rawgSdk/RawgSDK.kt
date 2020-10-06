@@ -99,7 +99,7 @@ class RawgSDK(databaseDriverFactory: DatabaseDriverFactory) {
     ): Flow<Resource<List<Game>>> {
         return networkBoundResource(
             query = {
-                if (search == null) database.getAllGames(
+                if (search == null) database.allGames(
                     page = config.page
                 ) else database.searchGames(
                     keyword = search,
@@ -107,7 +107,7 @@ class RawgSDK(databaseDriverFactory: DatabaseDriverFactory) {
                 )
             },
             fetch = {
-                api.getGames(keyword = search, config = config)
+                api.allGames(keyword = search, config = config)
             },
             saveFetchResult = { items ->
                 if (config.forceReload)
@@ -124,7 +124,7 @@ class RawgSDK(databaseDriverFactory: DatabaseDriverFactory) {
     ): Flow<Resource<List<Game>>> {
         return networkBoundResource(
             query = { database.gamesByPublisher(publisherId, config.page) },
-            fetch = { api.getGames(publishersId = publisherId, config = config) },
+            fetch = { api.allGames(publishersId = publisherId, config = config) },
             saveFetchResult = { items -> database.cacheGames(items, publisherId, "publishers") },
             shouldFetch = { it.isNullOrEmpty() || config.forceReload }
         )
@@ -136,7 +136,7 @@ class RawgSDK(databaseDriverFactory: DatabaseDriverFactory) {
     ): Flow<Resource<List<Game>>> {
         return networkBoundResource(
             query = { database.gamesByPlatform(platformIds, config.page) },
-            fetch = { api.getGames(platformIds = platformIds, config = config) },
+            fetch = { api.allGames(platformIds = platformIds, config = config) },
             saveFetchResult = { items ->
                 database.cacheGames(
                     gameListResponse = items,
@@ -153,7 +153,7 @@ class RawgSDK(databaseDriverFactory: DatabaseDriverFactory) {
     ): Flow<Resource<List<Game>>> {
         return networkBoundResource(
             query = { database.gamesByParentPlatforms(platformIds, config.page) },
-            fetch = { api.getGames(parentPlatformIds = platformIds, config = config) },
+            fetch = { api.allGames(parentPlatformIds = platformIds, config = config) },
             saveFetchResult = { items ->
                 database.cacheGames(
                     gameListResponse = items,
@@ -170,7 +170,7 @@ class RawgSDK(databaseDriverFactory: DatabaseDriverFactory) {
     ): Flow<Resource<List<Game>>> {
         return networkBoundResource(
             query = { database.gamesByDevelopers(developerIds, config.page) },
-            fetch = { api.getGames(developerIds = developerIds, config = config) },
+            fetch = { api.allGames(developerIds = developerIds, config = config) },
             saveFetchResult = { items -> database.cacheGames(items, group = "developers") },
             shouldFetch = { it.isNullOrEmpty() || config.forceReload }
         )
@@ -182,7 +182,7 @@ class RawgSDK(databaseDriverFactory: DatabaseDriverFactory) {
     ): Flow<Resource<List<Game>>> {
         return networkBoundResource(
             query = { database.gamesByGenres(genreIds, config.page) },
-            fetch = { api.getGames(genreIds = genreIds, config = config) },
+            fetch = { api.allGames(genreIds = genreIds, config = config) },
             saveFetchResult = { items -> database.cacheGames(items, group = "genres") },
             shouldFetch = { it.isNullOrEmpty() || config.forceReload }
         )
@@ -194,9 +194,37 @@ class RawgSDK(databaseDriverFactory: DatabaseDriverFactory) {
     ): Flow<Resource<List<Game>>> {
         return networkBoundResource(
             query = { database.gamesByTags(tagIds, config.page) },
-            fetch = { api.getGames(tagIds = tagIds, config = config) },
+            fetch = { api.allGames(tagIds = tagIds, config = config) },
             saveFetchResult = { items -> database.cacheGames(items, group = "tags") },
             shouldFetch = { it.isNullOrEmpty() || config.forceReload }
         )
     }
+
+    fun gameAdditions(
+        gameId: Int,
+        config: GameRequestConfig = GameRequestConfig()
+    ): Flow<Resource<List<Game>>> {
+        return networkBoundResource(
+            query = { database.gameExtras(gameId, "additions") },
+            fetch = { api.gameAdditions(gameId = gameId, config = config) },
+            saveFetchResult = { items ->
+                database.cacheGames(
+                    items,
+                    group = "${gameId}/additions"
+                )
+            },
+            shouldFetch = { it.isNullOrEmpty() || config.forceReload }
+        )
+    }
+
+    fun paginatedGameAdditions(gameId: Int) =
+        PaginatedGameRequest(
+            init = { gameAdditions(gameId) },
+            next = { page ->
+                gameAdditions(
+                    gameId,
+                    GameRequestConfig(forceReload = false, page = page)
+                )
+            }
+        )
 }

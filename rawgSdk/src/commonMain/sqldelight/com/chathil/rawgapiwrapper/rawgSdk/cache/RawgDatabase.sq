@@ -538,6 +538,11 @@ WHERE Game_Store.storeId IN ?
 AND Game.param = 'stores'
 AND Game.page = ?;
 
+loadGameExtras:
+SELECT DISTINCT Game.*
+FROM Game
+WHERE Game.param = ?;
+
 loadGame:
 SELECT * FROM Game
 WHERE apiId = ?;
